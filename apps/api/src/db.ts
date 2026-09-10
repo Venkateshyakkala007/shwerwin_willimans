@@ -1,0 +1,13 @@
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
+import * as schema from '../../../database/schema';
+
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) throw new Error('DATABASE_URL is required');
+
+export const pool = new Pool({
+  connectionString,
+  max: Number(process.env.DATABASE_POOL_SIZE ?? 10),
+  connectionTimeoutMillis: 5_000,
+});
+export const db = drizzle(pool, { schema });

@@ -1,1 +1,5 @@
-export async function GET() { return Response.json({ status:'ok', service:'cover-the-codebase-web', time:new Date().toISOString() }); }
+import { proxyToBackend } from '../../../../../lib/backend';
+
+export async function GET(request: Request) {
+  return proxyToBackend(request, '/api/v1/health/live');
+}

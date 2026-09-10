@@ -1,39 +1,54 @@
-# Cover the Codebase
+# Cover the Codebase — V3 local demo
 
-Phase 1 individual developer dashboard based on the supplied Sherwin-Williams scoreboard reference. The project uses deterministic fake data and contract-compliant fake connectors until enterprise APIs are available.
+A PostgreSQL-backed development application using explicit synthetic publications in place of Databricks. This is a testable V3 foundation, not a production implementation or proof of live source availability.
 
-## Start locally
+## Run locally with Docker
 
-```bash
-cp env.example .env
-npm install
-npm run dev
+```sh
+npm run docker:up
 ```
 
-Open `http://localhost:3000`.
+Open **http://localhost:3000**. The API is available at `http://localhost:4000/api/v1/health/ready`.
 
-## Useful scripts
+Compose applies the additive migrations, preserves the existing SQL seed, adds the V3 sample seed, and starts a persistent worker. Ports bind to loopback. Redis is optional (`--profile cache`); accepted work resides in PostgreSQL. The named PostgreSQL volume survives ordinary restarts. Do not use `docker compose down -v` if you want to preserve your testing data.
 
-```bash
-npm run build
-npm run lint
-npm run typecheck
-npm test
-npm run seed -- happy-path
-npm run sync:nightly
+## Browser testing
+
+Use the **Test as** selector:
+
+- **Priya Kowalski — Employee:** five independent scorecards, learning/attestation, assessments, consumption, preserved recognition, and aggregate team access.
+- **Sam Rivera — Manager/operator:** organization/department/team scopes, explicitly granted employee detail, publication jobs and local event receipts.
+- **Alex Morgan — Contractor:** public content only; Enablement scores unavailable because comparable evidence is absent.
+- **Taylor Chen — Missing CI evidence:** Quality unavailable without affecting the other groups.
+- **Inactive Demo:** access denied.
+
+Try adding progress, explicitly attesting completion, viewing evidence, retracting it, and starting another attempt. A plain percentage update cannot complete learning. September 2026 contains sample consumption; other months display unavailable. Export downloads a publication-pinned JSON file.
+
+## Data and ownership
+
+- `database/schema.ts` and `0000_initial.sql`: preserved legacy Drizzle model.
+- `database/migrations/0001_v3.sql`: authoritative reviewed-SQL V3 schema; do not rewrite the initial migration. New runtime identifiers use UUIDv7; legacy IDs remain unchanged.
+- `database/v3-seed.sql`: idempotent synthetic users, assignments, metric definitions, observations, scopes, and reference policy.
+- `packages/v3/catalogue.json`: M25 catalogue reference for tests.
+- `packages/v3/domain.ts`: fixture validation, fixed-point group arithmetic and Eastern scheduling.
+- `apps/api/src/v3.ts`: current authorization, learning commands, reads and durable receipts.
+- `apps/worker/src/`: durable local worker, synthetic publication and event sink.
+
+V3 tables use the `v3` PostgreSQL namespace and reviewed SQL migrations. Drizzle generation remains for the legacy model; changes to V3 tables require an additive reviewed SQL migration registered in the migration journal. Old course-progress records are preserved, not transformed into provider evidence or explicit attestations. New V3 progress references enrollment attempts; accepted completion references append-only attestation evidence.
+
+The API **does not calculate analytics**. The local synthetic worker validates and publishes supplied raw/normalized fixtures with the M25 weights. Its future replacement is an approved Databricks Export adapter. Learning changes do not manufacture Copilot/GitHub/CI results or silently change the fixed metric fixtures. Organizational fixtures are independent examples, not averages of employee scores.
+
+## Verification
+
+```sh
 npm run verify
+npm run build
 ```
 
-## Structure
+Database tests must target an **isolated seeded test database**, because they intentionally change assignments and simulate failed imports:
 
-- `app/` — pages and REST route handlers.
-- `apps/worker/` — background synchronization entry point.
-- `components/ui/` — reusable shadcn interface primitives.
-- `packages/contracts/` — canonical domain and provider contracts.
-- `packages/connectors/` — fake connectors and production safety checks.
-- `packages/test-data/` — deterministic scenarios.
-- `scripts/` — seed, sync, and verification utilities.
-- `tests/` — contract and safety tests.
-- `docs/` — architecture and API notes.
+```sh
+DEMO_MODE=true V3_INTEGRATION=true DATABASE_URL=postgresql://... node --import tsx --test tests/v3-integration.test.mjs
+```
 
-All visible records are synthetic and illustrative. Fake adapters must never be enabled in production.
+See [V3 implementation status](docs/v3-implementation-status.md) for boundaries and remaining enterprise work.

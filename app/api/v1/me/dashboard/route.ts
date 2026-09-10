@@ -1,2 +1,5 @@
-import { dashboard } from '../../../../../packages/test-data/src/scenarios';
-export async function GET() { return Response.json({ data: dashboard, meta: { illustrative: true, contractVersion: '1.0' } }); }
+import { proxyToBackend } from '../../../../../lib/backend';
+
+export async function GET(request: Request) {
+  return proxyToBackend(request, '/api/v1/me/dashboard');
+}

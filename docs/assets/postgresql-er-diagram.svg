@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="2440" viewBox="0 0 2400 2440" role="img" aria-labelledby="title desc">
+  <title id="title">Cover the Codebase PostgreSQL ER Diagram</title>
+  <desc id="desc">Entity relationship diagram for the minimal nineteen-table Phase 1 PostgreSQL schema.</desc>
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#002b49" flood-opacity="0.13"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#597386"/></marker>
+    <style>
+      .page{fill:#f8fbfc}.title{font:800 42px Arial,sans-serif;fill:#002b49;letter-spacing:2px}.subtitle{font:400 19px Arial,sans-serif;fill:#52626e}.section{fill:#fff;stroke:#d8e1e6;stroke-width:2}.section-title{font:800 18px Arial,sans-serif;letter-spacing:2px}.box{fill:#fff;stroke-width:2;filter:url(#shadow)}.id{stroke:#056ead}.learning{stroke:#13857c}.recognition{stroke:#c83d38}.activity{stroke:#7754a4}.ops{stroke:#65737d}.head-id{fill:#056ead}.head-learning{fill:#13857c}.head-recognition{fill:#c83d38}.head-activity{fill:#7754a4}.head-ops{fill:#455966}.table-name{font:800 16px Arial,sans-serif;fill:#fff;letter-spacing:.5px}.column{font:400 12.5px 'SFMono-Regular',Consolas,monospace;fill:#263945}.key{font-weight:800;fill:#002b49}.relation{fill:none;stroke:#597386;stroke-width:2.2;marker-end:url(#arrow)}.relation-dashed{fill:none;stroke:#8a9aa5;stroke-width:1.8;stroke-dasharray:8 7;marker-end:url(#arrow)}.cardinality{font:800 12px Arial,sans-serif;fill:#002b49}.legend{font:600 13px Arial,sans-serif;fill:#52626e}.note{font:400 12px Arial,sans-serif;fill:#6b7480}
+    </style>
+  </defs>
+  <rect class="page" width="2400" height="2440"/>
+  <rect x="0" y="0" width="2400" height="118" fill="#002b49"/>
+  <rect x="0" y="118" width="2400" height="10" fill="#ef4135"/>
+  <text x="56" y="59" class="title" fill="#fff" style="fill:#fff">COVER THE CODEBASE</text>
+  <text x="57" y="91" class="subtitle" fill="#bfe0f5" style="fill:#bfe0f5">Minimal Phase 1 PostgreSQL Entity Relationship Diagram · 19 tables</text>
+
+  <!-- relationship lines rendered behind entities -->
+  <path class="relation" d="M390 315 H465"/><text class="cardinality" x="400" y="304">1</text><text class="cardinality" x="437" y="304">0..*</text>
+  <path class="relation" d="M825 315 H900"/><text class="cardinality" x="835" y="304">1</text><text class="cardinality" x="870" y="304">0..*</text>
+  <path class="relation" d="M390 738 H465"/><text class="cardinality" x="400" y="727">1</text><text class="cardinality" x="437" y="727">0..*</text>
+  <path class="relation" d="M825 738 H900"/><text class="cardinality" x="835" y="727">0..*</text><text class="cardinality" x="871" y="727">1</text>
+  <path class="relation" d="M210 874 V1010 H465"/><text class="cardinality" x="221" y="896">1</text><text class="cardinality" x="426" y="1000">0..*</text>
+  <path class="relation" d="M1070 906 V1010 H825"/><text class="cardinality" x="1081" y="928">1</text><text class="cardinality" x="835" y="1000">0..*</text>
+  <path class="relation" d="M1070 906 V1010 H1210"/><text class="cardinality" x="1082" y="960">1</text><text class="cardinality" x="1172" y="1000">0..*</text>
+  <path class="relation" d="M1570 1020 H1645"/><text class="cardinality" x="1580" y="1009">1</text><text class="cardinality" x="1617" y="1009">0..*</text>
+  <path class="relation" d="M390 1540 H465"/><text class="cardinality" x="400" y="1529">1</text><text class="cardinality" x="437" y="1529">0..*</text>
+  <path class="relation-dashed" d="M645 466 V520 H1368 V955"/><text class="cardinality" x="655" y="492">users 1 → 0..* assignments / progress / attempts</text>
+  <path class="relation-dashed" d="M645 466 V1300 H645 V1375"/><text class="cardinality" x="655" y="1290">users 1 → 0..* recognition</text>
+  <path class="relation-dashed" d="M645 466 V1840 H210 V1940"/><text class="cardinality" x="655" y="1828">users 1 → 0..* activity and controls</text>
+  <path class="relation" d="M1875 2090 H1800" transform="translate(0,0)"/><text class="cardinality" x="1810" y="2078">1</text><text class="cardinality" x="1845" y="2078">0..*</text>
+
+  <!-- section backgrounds -->
+  <rect class="section" x="35" y="150" width="1285" height="350" rx="16"/>
+  <text class="section-title" x="58" y="181" fill="#056ead">IDENTITY &amp; ACCESS</text>
+  <rect class="section" x="35" y="525" width="2330" height="800" rx="16"/>
+  <text class="section-title" x="58" y="556" fill="#13857c">LEARNING &amp; ASSESSMENTS</text>
+  <rect class="section" x="35" y="1350" width="2330" height="490" rx="16"/>
+  <text class="section-title" x="58" y="1381" fill="#c83d38">RECOGNITION &amp; ACTIVITY</text>
+  <rect class="section" x="35" y="1865" width="2330" height="475" rx="16"/>
+  <text class="section-title" x="58" y="1896" fill="#455966">RELIABILITY, AUDIT &amp; INTEGRATION</text>
+
+  <!-- visible FK relationships; parent 1 to child 0..* -->
+  <path class="relation" d="M390 315 H465"/><text class="cardinality" x="399" y="304">1</text><text class="cardinality" x="432" y="304">0..*</text>
+  <path class="relation" d="M825 315 H900"/><text class="cardinality" x="834" y="304">1</text><text class="cardinality" x="867" y="304">0..*</text>
+  <path class="relation" d="M390 738 H465"/><text class="cardinality" x="399" y="727">1</text><text class="cardinality" x="432" y="727">0..*</text>
+  <path class="relation" d="M825 738 H900"/><text class="cardinality" x="834" y="727">0..*</text><text class="cardinality" x="875" y="727">1</text>
+  <path class="relation" d="M210 874 V915 H645 V960"/><text class="cardinality" x="220" y="895">1</text><text class="cardinality" x="653" y="949">0..*</text>
+  <path class="relation" d="M1070 906 V920 H390 V1050"/><text class="cardinality" x="1080" y="919">1</text><text class="cardinality" x="400" y="1040">0..*</text>
+  <path class="relation" d="M1070 906 V922 H1210 V1020"/><text class="cardinality" x="1080" y="934">1</text><text class="cardinality" x="1218" y="1008">0..*</text>
+  <path class="relation" d="M1570 1065 H1645"/><text class="cardinality" x="1578" y="1054">1</text><text class="cardinality" x="1613" y="1054">0..*</text>
+  <path class="relation" d="M390 1550 H465"/><text class="cardinality" x="399" y="1539">1</text><text class="cardinality" x="432" y="1539">0..*</text>
+  <path class="relation" d="M1380 2090 H1330"/><text class="cardinality" x="1340" y="2079">1</text><text class="cardinality" x="1357" y="2079">0..*</text>
+
+  <!-- the central users table is parent for user-owned records -->
+  <path class="relation-dashed" d="M645 466 V520 H430 V1050 H390"/><text class="cardinality" x="438" y="1038">0..*</text>
+  <path class="relation-dashed" d="M645 466 V938"/><text class="cardinality" x="653" y="928">0..*</text>
+  <path class="relation-dashed" d="M680 466 V540 H1830 V935"/><text class="cardinality" x="1838" y="925">0..*</text>
+  <path class="relation-dashed" d="M610 466 V1335 H645 V1425"/><text class="cardinality" x="653" y="1414">0..*</text>
+  <path class="relation-dashed" d="M590 466 V1320 H1070 V1410"/><text class="cardinality" x="1078" y="1399">0..*</text>
+  <path class="relation-dashed" d="M570 466 V1305 H1460 V1398"/><text class="cardinality" x="1468" y="1387">0..*</text>
+  <path class="relation-dashed" d="M550 466 V1290 H1860 V1388"/><text class="cardinality" x="1868" y="1377">0..*</text>
+  <path class="relation-dashed" d="M530 466 V1850 H255 V1930"/><text class="cardinality" x="263" y="1919">0..*</text>
+  <path class="relation-dashed" d="M510 466 V1835 H695 V1920"/><text class="cardinality" x="703" y="1909">0..*</text>
+  <path class="relation-dashed" d="M490 466 V1820 H1135 V1900"/><text class="cardinality" x="1143" y="1889">0..*</text>
+
+  <!-- teams -->
+  <g transform="translate(60 205)"><rect class="box id" width="330" height="218" rx="8"/><rect class="head-id" width="330" height="42" rx="8"/><rect class="head-id" y="34" width="330" height="8"/><text class="table-name" x="16" y="27">TEAMS</text>
+    <text class="column key" x="16" y="68">PK  id : uuid</text><text class="column" x="16" y="91">name : text</text><text class="column" x="16" y="114">active : boolean</text><text class="column" x="16" y="137">created_at : timestamptz</text><text class="column" x="16" y="160">updated_at : timestamptz</text><text class="note" x="16" y="193">One team contains many users.</text>
+  </g>
+  <!-- users -->
+  <g transform="translate(465 190)"><rect class="box id" width="360" height="276" rx="8"/><rect class="head-id" width="360" height="42" rx="8"/><rect class="head-id" y="34" width="360" height="8"/><text class="table-name" x="16" y="27">USERS</text>
+    <text class="column key" x="16" y="65">PK  id : uuid</text><text class="column key" x="16" y="84">FK  team_id : uuid</text><text class="column" x="16" y="103">display_name : text</text><text class="column" x="16" y="122">email : text</text><text class="column key" x="16" y="141">UK  person_number : text</text><text class="column" x="16" y="160">employment_type : text</text><text class="column" x="16" y="179">job_role / timezone : text</text><text class="column" x="16" y="198">profile_status : text</text><text class="column" x="16" y="217">active / entitled : boolean</text><text class="column" x="16" y="236">created_at / updated_at : timestamptz</text><text class="column" x="16" y="255">version : integer</text>
+  </g>
+  <!-- external identities -->
+  <g transform="translate(900 205)"><rect class="box id" width="380" height="235" rx="8"/><rect class="head-id" width="380" height="42" rx="8"/><rect class="head-id" y="34" width="380" height="8"/><text class="table-name" x="16" y="27">EXTERNAL_IDENTITIES</text>
+    <text class="column key" x="16" y="68">PK  id : uuid</text><text class="column key" x="16" y="91">FK  user_id : uuid</text><text class="column" x="16" y="114">provider : text</text><text class="column key" x="16" y="137">UK  tenant_id + external_id : text</text><text class="column" x="16" y="160">mapping_status : text</text><text class="column" x="16" y="183">created_at / updated_at : timestamptz</text><text class="note" x="16" y="214">Entra, HR, GitHub, Jira, learning IDs.</text>
+  </g>
+
+  <!-- learning paths -->
+  <g transform="translate(60 595)"><rect class="box learning" width="330" height="279" rx="8"/><rect class="head-learning" width="330" height="42" rx="8"/><rect class="head-learning" y="34" width="330" height="8"/><text class="table-name" x="16" y="27">LEARNING_PATHS</text>
+    <text class="column key" x="16" y="66">PK  id : uuid</text><text class="column key" x="16" y="87">UK  path_key + version_number</text><text class="column" x="16" y="108">name : text</text><text class="column" x="16" y="129">description : text</text><text class="column" x="16" y="150">target_role : text</text><text class="column" x="16" y="171">active : boolean</text><text class="column" x="16" y="192">effective_from : timestamptz</text><text class="column" x="16" y="213">effective_to : timestamptz?</text><text class="note" x="16" y="250">One row represents one path version.</text>
+  </g>
+  <!-- path courses -->
+  <g transform="translate(465 615)"><rect class="box learning" width="360" height="245" rx="8"/><rect class="head-learning" width="360" height="42" rx="8"/><rect class="head-learning" y="34" width="360" height="8"/><text class="table-name" x="16" y="27">LEARNING_PATH_COURSES</text>
+    <text class="column key" x="16" y="68">PK  id : uuid</text><text class="column key" x="16" y="91">FK  learning_path_id : uuid</text><text class="column key" x="16" y="114">FK  course_id : uuid</text><text class="column" x="16" y="137">sequence_number : integer</text><text class="column" x="16" y="160">stage : text</text><text class="column" x="16" y="183">required : boolean</text><text class="note" x="16" y="218">Many-to-many path/course relationship.</text>
+  </g>
+  <!-- courses -->
+  <g transform="translate(900 575)"><rect class="box learning" width="340" height="331" rx="8"/><rect class="head-learning" width="340" height="42" rx="8"/><rect class="head-learning" y="34" width="340" height="8"/><text class="table-name" x="16" y="27">COURSES</text>
+    <text class="column key" x="16" y="63">PK  id : uuid</text><text class="column key" x="16" y="83">UK  course_key : text</text><text class="column" x="16" y="103">title : text</text><text class="column" x="16" y="123">provider : text</text><text class="column" x="16" y="143">provider_course_id : text?</text><text class="column" x="16" y="163">provider_url : text?</text><text class="column" x="16" y="183">duration_minutes : integer</text><text class="column" x="16" y="203">eligibility : text</text><text class="column" x="16" y="223">manual_progress_allowed : boolean</text><text class="column" x="16" y="243">active : boolean</text><text class="column" x="16" y="263">created_at / updated_at : timestamptz</text><text class="note" x="16" y="302">Canonical provider-neutral course.</text>
+  </g>
+  <!-- user assignments -->
+  <g transform="translate(465 960)"><rect class="box learning" width="360" height="276" rx="8"/><rect class="head-learning" width="360" height="42" rx="8"/><rect class="head-learning" y="34" width="360" height="8"/><text class="table-name" x="16" y="27">USER_PATH_ASSIGNMENTS</text>
+    <text class="column key" x="16" y="68">PK  id : uuid</text><text class="column key" x="16" y="91">FK  user_id : uuid</text><text class="column key" x="16" y="114">FK  learning_path_id : uuid</text><text class="column" x="16" y="137">status : text</text><text class="column" x="16" y="160">assignment_reason : text</text><text class="column" x="16" y="183">assigned_at : timestamptz</text><text class="column" x="16" y="206">completed_at : timestamptz?</text><text class="note" x="16" y="244">Preserves exact assigned path version.</text>
+  </g>
+  <!-- progress -->
+  <g transform="translate(60 935)"><rect class="box learning" width="330" height="340" rx="8"/><rect class="head-learning" width="330" height="42" rx="8"/><rect class="head-learning" y="34" width="330" height="8"/><text class="table-name" x="16" y="27">COURSE_PROGRESS</text>
+    <text class="column key" x="16" y="63">PK  id : uuid</text><text class="column key" x="16" y="83">FK  user_id : uuid</text><text class="column key" x="16" y="103">FK  course_id : uuid</text><text class="column key" x="16" y="123">UK  user_id + course_id</text><text class="column" x="16" y="143">percentage : integer</text><text class="column" x="16" y="163">status / source : text</text><text class="column" x="16" y="183">evidence_metadata : jsonb?</text><text class="column" x="16" y="203">started_at : timestamptz?</text><text class="column" x="16" y="223">completed_at : timestamptz?</text><text class="column" x="16" y="243">updated_at : timestamptz</text><text class="column" x="16" y="263">version : integer</text><text class="note" x="16" y="305">Current optimistic-concurrency projection.</text>
+  </g>
+  <!-- knowledge checks -->
+  <g transform="translate(1210 935)"><rect class="box learning" width="360" height="276" rx="8"/><rect class="head-learning" width="360" height="42" rx="8"/><rect class="head-learning" y="34" width="360" height="8"/><text class="table-name" x="16" y="27">KNOWLEDGE_CHECKS</text>
+    <text class="column key" x="16" y="68">PK  id : uuid</text><text class="column key" x="16" y="91">FK  course_id : uuid</text><text class="column" x="16" y="114">title : text</text><text class="column key" x="16" y="137">UK  course_id + version_number</text><text class="column" x="16" y="160">passing_score : integer</text><text class="column" x="16" y="183">questions : jsonb</text><text class="column" x="16" y="206">active : boolean</text><text class="note" x="16" y="244">Versioned assessment definition.</text>
+  </g>
+  <!-- attempts -->
+  <g transform="translate(1645 935)"><rect class="box learning" width="370" height="293" rx="8"/><rect class="head-learning" width="370" height="42" rx="8"/><rect class="head-learning" y="34" width="370" height="8"/><text class="table-name" x="16" y="27">KNOWLEDGE_CHECK_ATTEMPTS</text>
+    <text class="column key" x="16" y="66">PK  id : uuid</text><text class="column key" x="16" y="87">FK  knowledge_check_id : uuid</text><text class="column key" x="16" y="108">FK  user_id : uuid</text><text class="column key" x="16" y="129">UK  check + user + attempt_number</text><text class="column" x="16" y="150">submitted_answers : jsonb</text><text class="column" x="16" y="171">score : integer</text><text class="column" x="16" y="192">passed : boolean</text><text class="column" x="16" y="213">submitted_at : timestamptz</text><text class="note" x="16" y="259">Immutable submitted assessment result.</text>
+  </g>
+
+  <!-- badges -->
+  <g transform="translate(60 1410)"><rect class="box recognition" width="330" height="330" rx="8"/><rect class="head-recognition" width="330" height="42" rx="8"/><rect class="head-recognition" y="34" width="330" height="8"/><text class="table-name" x="16" y="27">BADGES</text>
+    <text class="column key" x="16" y="64">PK  id : uuid</text><text class="column key" x="16" y="85">UK  badge_key : text</text><text class="column" x="16" y="106">name : text</text><text class="column" x="16" y="127">description : text</text><text class="column" x="16" y="148">color_name / color_code : text</text><text class="column" x="16" y="169">rule_version : integer</text><text class="column" x="16" y="190">rule_definition : jsonb</text><text class="column" x="16" y="211">active : boolean</text><text class="note" x="16" y="292">Paint-chip display and versioned rule.</text>
+  </g>
+  <!-- user badges -->
+  <g transform="translate(465 1425)"><rect class="box recognition" width="360" height="280" rx="8"/><rect class="head-recognition" width="360" height="42" rx="8"/><rect class="head-recognition" y="34" width="360" height="8"/><text class="table-name" x="16" y="27">USER_BADGES</text>
+    <text class="column key" x="16" y="68">PK  id : uuid</text><text class="column key" x="16" y="91">FK  user_id : uuid</text><text class="column key" x="16" y="114">FK  badge_id : uuid</text><text class="column key" x="16" y="137">UK  award_key : text</text><text class="column" x="16" y="160">evidence : jsonb</text><text class="column" x="16" y="183">awarded_at : timestamptz</text><text class="column" x="16" y="206">status : text</text><text class="note" x="16" y="248">Exactly-once earned badge record.</text>
+  </g>
+  <!-- ledger -->
+  <g transform="translate(900 1410)"><rect class="box recognition" width="340" height="325" rx="8"/><rect class="head-recognition" width="340" height="42" rx="8"/><rect class="head-recognition" y="34" width="340" height="8"/><text class="table-name" x="16" y="27">POINT_LEDGER</text>
+    <text class="column key" x="16" y="64">PK  id : uuid</text><text class="column key" x="16" y="85">FK  user_id : uuid</text><text class="column" x="16" y="106">entry_type : text</text><text class="column" x="16" y="127">points : integer (signed)</text><text class="column" x="16" y="148">reason_code : text</text><text class="column key" x="16" y="169">UK  award_key : text</text><text class="column" x="16" y="190">evidence_type : text</text><text class="column" x="16" y="211">evidence_id : uuid</text><text class="column" x="16" y="232">created_at : timestamptz</text><text class="note" x="16" y="287">Append-only awards and reversals.</text>
+  </g>
+  <!-- certifications -->
+  <g transform="translate(1285 1398)"><rect class="box recognition" width="355" height="350" rx="8"/><rect class="head-recognition" width="355" height="42" rx="8"/><rect class="head-recognition" y="34" width="355" height="8"/><text class="table-name" x="16" y="27">USER_CERTIFICATIONS</text>
+    <text class="column key" x="16" y="62">PK  id : uuid</text><text class="column key" x="16" y="82">FK  user_id : uuid</text><text class="column" x="16" y="102">certification_key : text</text><text class="column" x="16" y="122">certification_name : text</text><text class="column" x="16" y="142">issuer / credential_id : text</text><text class="column" x="16" y="162">verification_url : text?</text><text class="column" x="16" y="182">verification_status : text</text><text class="column" x="16" y="202">issued_at : timestamptz</text><text class="column" x="16" y="222">expires_at : timestamptz?</text><text class="column" x="16" y="242">verified_at : timestamptz?</text><text class="note" x="16" y="312">Verified issuer credential evidence.</text>
+  </g>
+  <!-- weekly activity -->
+  <g transform="translate(1685 1388)"><rect class="box activity" width="350" height="370" rx="8"/><rect class="head-activity" width="350" height="42" rx="8"/><rect class="head-activity" y="34" width="350" height="8"/><text class="table-name" x="16" y="27">WEEKLY_ACTIVITY</text>
+    <text class="column key" x="16" y="61">PK  id : uuid</text><text class="column key" x="16" y="81">FK  user_id : uuid</text><text class="column key" x="16" y="101">UK  user_id + week_start</text><text class="column" x="16" y="121">qualifying_days : integer</text><text class="column" x="16" y="141">request_count : integer</text><text class="column" x="16" y="161">input_tokens / output_tokens : bigint</text><text class="column" x="16" y="181">estimated_cost : numeric</text><text class="column" x="16" y="201">tool_mix : jsonb</text><text class="column" x="16" y="221">source : text</text><text class="column" x="16" y="241">data_state : text</text><text class="column" x="16" y="261">data_through : timestamptz</text><text class="note" x="16" y="331">12-week chart and approved tool mix.</text>
+  </g>
+
+  <!-- idempotency -->
+  <g transform="translate(60 1930)"><rect class="box ops" width="390" height="315" rx="8"/><rect class="head-ops" width="390" height="42" rx="8"/><rect class="head-ops" y="34" width="390" height="8"/><text class="table-name" x="16" y="27">IDEMPOTENCY_RECORDS</text>
+    <text class="column key" x="16" y="64">PK  id : uuid</text><text class="column key" x="16" y="85">FK  user_id : uuid</text><text class="column key" x="16" y="106">UK  user_id + operation_id</text><text class="column" x="16" y="127">operation_type : text</text><text class="column" x="16" y="148">request_hash : text</text><text class="column" x="16" y="169">response_status : integer</text><text class="column" x="16" y="190">response_body : jsonb</text><text class="column" x="16" y="211">created_at : timestamptz</text><text class="column" x="16" y="232">expires_at : timestamptz?</text><text class="note" x="16" y="280">Makes retries and offline replay safe.</text>
+  </g>
+  <!-- audit -->
+  <g transform="translate(500 1920)"><rect class="box ops" width="390" height="335" rx="8"/><rect class="head-ops" width="390" height="42" rx="8"/><rect class="head-ops" y="34" width="390" height="8"/><text class="table-name" x="16" y="27">AUDIT_EVENTS</text>
+    <text class="column key" x="16" y="62">PK  id : uuid</text><text class="column key" x="16" y="82">FK  actor_user_id : uuid?</text><text class="column key" x="16" y="102">FK  subject_user_id : uuid?</text><text class="column" x="16" y="122">action : text</text><text class="column" x="16" y="142">resource_type : text</text><text class="column" x="16" y="162">resource_id : uuid?</text><text class="column" x="16" y="182">outcome : text</text><text class="column" x="16" y="202">correlation_id : text</text><text class="column" x="16" y="222">metadata : jsonb?</text><text class="column" x="16" y="242">occurred_at : timestamptz</text><text class="note" x="16" y="299">Append-oriented security/business evidence.</text>
+  </g>
+  <!-- outbox -->
+  <g transform="translate(940 1900)"><rect class="box ops" width="390" height="375" rx="8"/><rect class="head-ops" width="390" height="42" rx="8"/><rect class="head-ops" y="34" width="390" height="8"/><text class="table-name" x="16" y="27">OUTBOX_EVENTS</text>
+    <text class="column key" x="16" y="60">PK  id : uuid</text><text class="column key" x="16" y="80">FK  actor_user_id : uuid?</text><text class="column key" x="16" y="100">FK  integration_run_id : uuid?</text><text class="column" x="16" y="120">aggregate_type : text</text><text class="column" x="16" y="140">aggregate_id : uuid</text><text class="column" x="16" y="160">event_type : text</text><text class="column" x="16" y="180">payload : jsonb</text><text class="column" x="16" y="200">contract_version : text</text><text class="column" x="16" y="220">status : text</text><text class="column" x="16" y="240">attempt_count : integer</text><text class="column" x="16" y="260">created_at : timestamptz</text><text class="column" x="16" y="280">exported_at : timestamptz?</text><text class="note" x="16" y="337">Durable application-to-Bronze export queue.</text>
+  </g>
+  <!-- integration runs -->
+  <g transform="translate(1380 1888)"><rect class="box activity" width="500" height="405" rx="8"/><rect class="head-activity" width="500" height="42" rx="8"/><rect class="head-activity" y="34" width="500" height="8"/><text class="table-name" x="16" y="27">INTEGRATION_RUNS</text>
+    <text class="column key" x="16" y="58">PK  id : uuid</text><text class="column" x="16" y="78">connector / direction : text</text><text class="column key" x="16" y="98">UK  logical_run_key : text</text><text class="column" x="16" y="118">status : text</text><text class="column" x="16" y="138">checkpoint : text?</text><text class="column" x="16" y="158">expected_count / actual_count : integer?</text><text class="column" x="16" y="178">expected_checksum : text?</text><text class="column" x="16" y="198">actual_checksum : text?</text><text class="column" x="16" y="218">data_state : text</text><text class="column" x="16" y="238">error_summary : jsonb?</text><text class="column" x="16" y="258">started_at : timestamptz</text><text class="column" x="16" y="278">completed_at : timestamptz?</text><text class="column" x="16" y="298">data_through : timestamptz?</text><text class="note" x="16" y="365">Run + checkpoint + reconciliation + freshness.</text>
+  </g>
+
+  <!-- legend -->
+  <g transform="translate(1930 1945)"><rect fill="#fff" stroke="#d8e1e6" width="390" height="260" rx="10"/><text class="section-title" x="20" y="34" fill="#002b49">LEGEND</text>
+    <rect x="20" y="55" width="18" height="18" fill="#056ead"/><text class="legend" x="50" y="69">Identity &amp; access</text>
+    <rect x="20" y="85" width="18" height="18" fill="#13857c"/><text class="legend" x="50" y="99">Learning &amp; assessment</text>
+    <rect x="20" y="115" width="18" height="18" fill="#c83d38"/><text class="legend" x="50" y="129">Recognition</text>
+    <rect x="20" y="145" width="18" height="18" fill="#7754a4"/><text class="legend" x="50" y="159">Activity &amp; integration</text>
+    <rect x="20" y="175" width="18" height="18" fill="#455966"/><text class="legend" x="50" y="189">Reliability &amp; audit</text>
+    <text class="legend" x="20" y="224">PK primary · FK foreign · UK unique</text>
+    <text class="note" x="20" y="246">Arrows point from parent to child.</text>
+  </g>
+  <text class="note" x="60" y="2386">Full column descriptions, examples, constraints and implementation guidance: postgresql-table-reference.md</text>
+  <text class="note" x="2200" y="2386" text-anchor="end">Version 1.0 · Phase 1 minimal schema</text>
+</svg>

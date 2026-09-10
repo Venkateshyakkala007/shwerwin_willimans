@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {validateAndScore,easternSchedule,uuid7,assertDemo} from '../packages/v3/domain.ts';
+const catalogue=JSON.parse(readFileSync('packages/v3/catalogue.json','utf8'));
+const definitions=catalogue.map(d=>({id:d.id,group_code:d.group,weight_bps:d.weight}));
+const rows=()=>catalogue.map(d=>({id:d.id,raw:80,score:d.weight?80:null,status:'sample_backed',sampleSize:10,evidence:'synthetic',periodStart:'2026-08-10',periodEnd:'2026-09-07'}));
+void test('M25 has five independent exact-weight groups and three diagnostics',()=>{assert.deepEqual(validateAndScore(rows(),definitions).map(g=>g.score),[80,80,80,80,80]);assert.deepEqual(definitions.filter(d=>!d.weight_bps).map(d=>d.id),['E5','T1','F5']);});
+void test('missing A4 blocks Adoption without renormalizing other groups',()=>{const r=rows();Object.assign(r.find(r=>r.id==='A4'),{raw:null,score:null,status:'unavailable'});const scores=validateAndScore(r,definitions);assert.equal(scores[1].score,null);assert.equal(scores[0].score,80);});
+void test('missing E5 does not block Enablement',()=>{const r=rows();Object.assign(r.find(r=>r.id==='E5'),{raw:null,score:null,status:'unavailable'});assert.equal(validateAndScore(r,definitions)[0].score,80);});
+void test('zero is real evidence, missing is not zero',()=>{const r=rows();Object.assign(r.find(r=>r.id==='E1'),{raw:0,score:0});assert.equal(validateAndScore(r,definitions)[0].score,44);});
+void test('invalid fixtures and hidden numeric values are rejected',()=>{assert.throws(()=>validateAndScore(rows().slice(1),definitions));const r=rows();r[0].score=101;assert.throws(()=>validateAndScore(r,definitions));r[0].score=80;r[0].status='suppressed';assert.throws(()=>validateAndScore(r,definitions));});
+void test('Eastern schedule resolves daylight and standard time correctly',()=>{assert.equal(easternSchedule(new Date('2026-09-09T09:00:00Z')),'2026-09-09T07:00:00.000Z');assert.equal(easternSchedule(new Date('2026-12-09T09:00:00Z')),'2026-12-09T08:00:00.000Z');assert.equal(easternSchedule(new Date('2026-09-09T06:00:00Z')),null);});
+void test('new IDs are UUIDv7',()=>assert.match(uuid7(),/^[0-9a-f-]{14}7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/));
+void test('synthetic processing is blocked in production',()=>{const previous=process.env.NODE_ENV;process.env.NODE_ENV='production';assert.throws(assertDemo);if(previous===undefined)delete process.env.NODE_ENV;else process.env.NODE_ENV=previous;});

@@ -1,0 +1,227 @@
+[
+  {
+    "id": "E1",
+    "group": "E",
+    "name": "Required Learning Completion",
+    "weight": 4500,
+    "unit": "%",
+    "normalizer": "identity",
+    "description": "Completed / assigned learning items."
+  },
+  {
+    "id": "E2",
+    "group": "E",
+    "name": "Training Start Rate",
+    "weight": 1000,
+    "unit": "%",
+    "normalizer": "identity",
+    "description": "Distinct started / assigned learners."
+  },
+  {
+    "id": "E3",
+    "group": "E",
+    "name": "On-Time Training Completion",
+    "weight": 2000,
+    "unit": "%",
+    "normalizer": "identity",
+    "description": "On-time completed / due assignments."
+  },
+  {
+    "id": "E4",
+    "group": "E",
+    "name": "AI Skill Assessment Completion",
+    "weight": 2500,
+    "unit": "%",
+    "normalizer": "identity",
+    "description": "Completed / assigned learner-assessment pairs; completion is not passing."
+  },
+  {
+    "id": "E5",
+    "group": "E",
+    "name": "AI Skill Level Gain",
+    "weight": 0,
+    "unit": "ordinal gain",
+    "normalizer": "diagnostic",
+    "description": "Requires comparable measured pre/post results. No result is inferred from a checkbox."
+  },
+  {
+    "id": "A1",
+    "group": "A",
+    "name": "Copilot Seat Activation Rate",
+    "weight": 500,
+    "unit": "%",
+    "normalizer": "identity",
+    "description": "Assigned seats with activity / assigned seats."
+  },
+  {
+    "id": "A2",
+    "group": "A",
+    "name": "28-Day AI-Active Rate",
+    "weight": 2500,
+    "unit": "%",
+    "normalizer": "identity",
+    "description": "AI-active / eligible licensed users in the 28-day window."
+  },
+  {
+    "id": "A3",
+    "group": "A",
+    "name": "Regular Copilot Use Score",
+    "weight": 2000,
+    "unit": "score",
+    "normalizer": "source",
+    "description": "100 \u00d7 min(active days, 8) / 8; eight-day target is sample policy only."
+  },
+  {
+    "id": "A4",
+    "group": "A",
+    "name": "Sustained Weekly Copilot Use Rate",
+    "weight": 3500,
+    "unit": "%",
+    "normalizer": "identity",
+    "description": "User-weeks with at least two active days / eligible user-weeks."
+  },
+  {
+    "id": "A5",
+    "group": "A",
+    "name": "Copilot Agent Adoption Rate",
+    "weight": 1500,
+    "unit": "%",
+    "normalizer": "identity",
+    "description": "IDE-agent users / AI-active users."
+  },
+  {
+    "id": "T1",
+    "group": "T",
+    "name": "Merged PR Throughput",
+    "weight": 0,
+    "unit": "PRs",
+    "normalizer": "diagnostic",
+    "description": "Distinct PRs merged to configured mainline."
+  },
+  {
+    "id": "T2",
+    "group": "T",
+    "name": "Median Merged PRs per Active Week",
+    "weight": 4000,
+    "unit": "PRs/week",
+    "normalizer": "higher",
+    "description": "Median merges per commit-active user-week, including zero-merge active weeks. Sample reference: 4."
+  },
+  {
+    "id": "T3",
+    "group": "T",
+    "name": "Median PR Life-Cycle Time",
+    "weight": 3000,
+    "unit": "hours",
+    "normalizer": "lower",
+    "description": "PR-open to merge elapsed hours. Sample reference: 24 hours."
+  },
+  {
+    "id": "T4",
+    "group": "T",
+    "name": "Median Time to First Human Review",
+    "weight": 1000,
+    "unit": "hours",
+    "normalizer": "lower",
+    "description": "PR-open to first human review. Sample reference: 6 hours."
+  },
+  {
+    "id": "T5",
+    "group": "T",
+    "name": "Orphaned PR Rate",
+    "weight": 2000,
+    "unit": "%",
+    "normalizer": "inverse",
+    "description": "Open non-draft PRs stale more than 30 days / open non-drafts."
+  },
+  {
+    "id": "F1",
+    "group": "F",
+    "name": "Median Development Preparation Time",
+    "weight": 2500,
+    "unit": "hours",
+    "normalizer": "lower",
+    "description": "Earliest linked commit to PR-open elapsed time, not active labor. Sample reference: 9 hours."
+  },
+  {
+    "id": "F2",
+    "group": "F",
+    "name": "Median Review Cycles",
+    "weight": 3000,
+    "unit": "cycles",
+    "normalizer": "lower",
+    "description": "Governed cycles per reviewed closed/merged PR. Sample reference: 1.5 cycles."
+  },
+  {
+    "id": "F3",
+    "group": "F",
+    "name": "Median Author Rework Time",
+    "weight": 2500,
+    "unit": "hours",
+    "normalizer": "lower",
+    "description": "Change-request to author-response time. Sample reference: 4.5 hours."
+  },
+  {
+    "id": "F4",
+    "group": "F",
+    "name": "Copilot Code Acceptance Rate",
+    "weight": 2000,
+    "unit": "%",
+    "normalizer": "identity",
+    "description": "Acceptance / compatible generation activity counts; anomalies are not capped."
+  },
+  {
+    "id": "F5",
+    "group": "F",
+    "name": "AI Credits per AI-Active User",
+    "weight": 0,
+    "unit": "credits",
+    "normalizer": "diagnostic",
+    "description": "Scoped credits / AI-active users; own total in self view."
+  },
+  {
+    "id": "Q1",
+    "group": "Q",
+    "name": "CI First-Pass Score",
+    "weight": 2500,
+    "unit": "%",
+    "normalizer": "identity",
+    "description": "First submission, complete nonempty required checks, attempt 1, initial head >5 changed lines."
+  },
+  {
+    "id": "Q2",
+    "group": "Q",
+    "name": "Revert-Free Score",
+    "weight": 2000,
+    "unit": "%",
+    "normalizer": "identity",
+    "description": "Unreverted / mature delivered authored commits; 30-day maturity."
+  },
+  {
+    "id": "Q3",
+    "group": "Q",
+    "name": "Review Rework-Free Score",
+    "weight": 1500,
+    "unit": "%",
+    "normalizer": "identity",
+    "description": "Eligible reviewed merged PRs without valid non-dismissed human change requests."
+  },
+  {
+    "id": "Q4",
+    "group": "Q",
+    "name": "PR Life-Cycle Speed Score",
+    "weight": 2500,
+    "unit": "score",
+    "normalizer": "source",
+    "description": "100 \u00d7 approved same-scope baseline / current lifecycle median, capped at 100."
+  },
+  {
+    "id": "Q5",
+    "group": "Q",
+    "name": "Mainline Completion Score",
+    "weight": 1500,
+    "unit": "%",
+    "normalizer": "identity",
+    "description": "Mature eligible non-reverted commits delivered within seven days."
+  }
+]
