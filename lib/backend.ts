@@ -10,8 +10,8 @@ export async function proxyToBackend(
   const headers = new Headers();
   for (const name of [
     'content-type',
+    'cookie',
     'x-client-operation-id',
-    'x-demo-user-id',
     'if-match',
     'origin',
   ]) {
@@ -31,14 +31,28 @@ export async function proxyToBackend(
         cache: 'no-store',
       },
     );
+    const responseHeaders = new Headers({
+      'content-type':
+        response.headers.get('content-type') ??
+        'application/json; charset=utf-8',
+      'cache-control': 'no-store',
+    });
+    const correlationId = response.headers.get('x-correlation-id');
+    if (correlationId)
+      responseHeaders.set('x-correlation-id', correlationId);
+    const setCookies =
+      (
+        response.headers as Headers & {
+          getSetCookie?: () => string[];
+        }
+      ).getSetCookie?.() ??
+      (response.headers.get('set-cookie')
+        ? [response.headers.get('set-cookie')!]
+        : []);
+    for (const cookie of setCookies) responseHeaders.append('set-cookie', cookie);
     return new Response(response.body, {
       status: response.status,
-      headers: {
-        'content-type':
-          response.headers.get('content-type') ??
-          'application/json; charset=utf-8',
-        'cache-control': 'no-store',
-      },
+      headers: responseHeaders,
     });
   } catch {
     return Response.json(

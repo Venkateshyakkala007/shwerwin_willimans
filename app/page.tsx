@@ -1,5 +1,10 @@
 'use client';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   BookOpen,
   BarChart3,
@@ -10,7 +15,10 @@ import {
   ShieldCheck,
   Download,
   Settings,
+  LogOut,
+  LockKeyhole,
 } from 'lucide-react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -20,9 +28,13 @@ import {
 } from '@/components/ui/dialog';
 import './v3.css';
 
-type Profile = { id: string; name: string; role: string };
 type Session = {
-  user: { id: string; display_name: string; employment_type: string };
+  user: {
+    id: string;
+    display_name: string;
+    employment_type: string;
+    job_role?: string;
+  };
   scopes: { id: string; name: string; kind: string; permissions: string[] }[];
 };
 type Publication = {
@@ -130,7 +142,6 @@ const groups: Record<string, string> = {
   F: 'Efficiency',
   Q: 'Quality',
 };
-const firstUser = '7c986e20-43a2-4a86-817d-6effc840ca91';
 const date = (s: string) =>
   new Intl.DateTimeFormat('en', {
     dateStyle: 'medium',
@@ -148,27 +159,199 @@ const initials = (name: string) =>
     .join('')
     .slice(0, 2)
     .toUpperCase();
+const badgePaint = [
+  ['Primer', 'SW 7008', 'Alabaster', 'AI Fundamentals', '#edeae0'],
+  ['First Coat', 'SW 6204', 'Sea Salt', 'Copilot in the IDE', '#cbd5cc'],
+  ['Cut In', 'SW 7029', 'Agreeable Gray', 'Prompt Engineering', '#d1cbc1'],
+  ['Second Coat', 'SW 6244', 'Naval', 'Agent Workflows', '#2e3b4e'],
+  ['Emerald', 'SW 6454', 'Shamrock', 'Library Contributor', '#2f6b4f'],
+  ['Full Coverage', 'SW 6868', 'Real Red', 'Applied Mastery', '#bc2b36'],
+] as const;
+const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? '/api/v1').replace(/\/$/, '');
 async function request<T>(
-  user: string,
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
   const headers = new Headers(options.headers);
   headers.set('content-type', 'application/json');
-  headers.set('x-demo-user-id', user);
-  const r = await fetch('/api/v1' + path, {
+  const r = await fetch(apiBase + path, {
     ...options,
     cache: 'no-store',
+    credentials: 'include',
     headers,
   });
-  const body = (await r.json()) as {
+  const body = (r.status === 204 ? {} : await r.json()) as {
     data: T;
     detail?: string;
     error?: { message: string };
   };
-  if (!r.ok)
-    throw new Error(body.detail ?? body.error?.message ?? 'Request failed.');
+  if (r.status === 401 && typeof window !== 'undefined')
+    window.dispatchEvent(new Event('cover:unauthorized'));
+  if (!r.ok) {
+    const error = new Error(
+      body.detail ?? body.error?.message ?? 'Request failed.',
+    ) as Error & { status: number };
+    error.status = r.status;
+    throw error;
+  }
   return body.data as T;
+}
+function Breadcrumbs({
+  level,
+  name,
+  team,
+  onMe,
+  onTeam,
+  onOrganization,
+}: {
+  level: 'me' | 'team' | 'organization';
+  name: string;
+  team: string;
+  onMe: () => void;
+  onTeam: () => void;
+  onOrganization: () => void;
+}) {
+  return (
+    <div className="v3-crumbs" aria-label="Scoreboard zoom">
+      <span>Zoom</span>
+      <button className={level === 'me' ? 'on' : ''} onClick={onMe}>Me · {name.split(' ')[0]}</button>
+      <b>›</b>
+      <button className={level === 'team' ? 'on' : ''} onClick={onTeam}>Team · {team}</button>
+      <b>›</b>
+      <button className={level === 'organization' ? 'on' : ''} onClick={onOrganization}>Organization</button>
+    </div>
+  );
+}
+function PaintCan({ percent }: { percent: number | null }) {
+  const p = percent === null ? 0 : Math.max(0, Math.min(100, percent));
+  return (
+    <div className="v3-can" aria-label={percent === null ? 'Coverage unavailable' : `${Math.round(p)}% coverage`}>
+      <i />
+      <div className="v3-can-body">
+        <span style={{ height: `${p}%` }} />
+        <strong>{percent === null ? '—' : `${Math.round(p)}%`}</strong>
+        <small>Coverage</small>
+      </div>
+      <em>Trained + Adopted</em>
+    </div>
+  );
+}
+function BadgeRack({ earned }: { earned: number }) {
+  const unavailable = earned < 0;
+  return (
+    <div className="v3-badge-rack">
+      {badgePaint.map((b, i) => (
+        <article className={`v3-paint-card ${unavailable || i >= earned ? 'locked' : ''}`} key={b[0]}>
+          <div style={{ background: b[4], color: i > 2 ? '#fff' : '#2d2d2d' }}><strong>{b[0]}</strong></div>
+          <footer>
+            <span>{b[1]}</span><small>{b[2]}</small>
+            <b>{b[3]}</b>
+            <em>{unavailable ? 'Unavailable' : i < earned ? 'Earned' : i === earned ? 'In progress' : 'Locked'}</em>
+          </footer>
+        </article>
+      ))}
+    </div>
+  );
+}
+function TrendChart({
+  values,
+  current,
+  label = 'Weekly history unavailable',
+}: {
+  values?: number[];
+  current?: number | null;
+  label?: string;
+}) {
+  const points = values?.length
+    ? values
+        .map((v, i) => `${18 + (i / (values.length - 1)) * 264},${104 - v * 0.86}`)
+        .join(' ')
+    : '';
+  const currentY = current == null ? null : 104 - Math.max(0, Math.min(100, current)) * 0.86;
+  return (
+    <svg className="v3-trend-chart" viewBox="0 0 300 126" aria-label={label}>
+      <title>{label}</title>
+      {[25, 50, 75].map((tick) => (
+        <g key={tick}>
+          <line x1="18" x2="282" y1={104 - tick * 0.86} y2={104 - tick * 0.86} />
+          <text x="2" y={107 - tick * 0.86}>{tick}</text>
+        </g>
+      ))}
+      <line x1="18" x2="282" y1="104" y2="104" />
+      {points && (
+        <>
+          <polygon className="area" points={`18,104 ${points} 282,104`} />
+          <polyline className="line" points={points} />
+        </>
+      )}
+      {!points && currentY !== null && (
+        <>
+          <line className="snapshot-guide" x1="282" x2="282" y1="104" y2={currentY} />
+          <circle className="snapshot" cx="282" cy={currentY} r="4" />
+          <text className="snapshot-label" x="278" y={Math.max(10, currentY - 8)} textAnchor="end">
+            {Math.round(current!)}% current
+          </text>
+        </>
+      )}
+      <text x="18" y="120">WK 1</text>
+      <text x="258" y="120">WK 12</text>
+      {!points && <text className="empty-label" x="150" y="61" textAnchor="middle">HISTORY UNAVAILABLE</text>}
+    </svg>
+  );
+}
+function Sparkline() {
+  return (
+    <svg className="v3-sparkline" viewBox="0 0 90 26" aria-label="Activity history unavailable">
+      <title>Activity history unavailable</title>
+      <line x1="1" x2="89" y1="21" y2="21" />
+      <line x1="1" x2="89" y1="13" y2="13" />
+      <text x="45" y="11" textAnchor="middle">Unavailable</text>
+    </svg>
+  );
+}
+function RailRows({ labels }: { labels: string[] }) {
+  return (
+    <div className="v3-rail-rows">
+      {labels.map((label) => (
+        <div className="v3-rail-row" key={label}>
+          <span>{label}</span><i><b /></i><em>—</em>
+        </div>
+      ))}
+    </div>
+  );
+}
+function NeutralMixBar({ labels }: { labels: string[] }) {
+  return (
+    <>
+      <div className="v3-mixbar" aria-label="Mix unavailable"><span /></div>
+      <div className="v3-mixlegend">
+        {labels.map((label, i) => <span key={label}><i className={`mix-${i}`} />{label} <b>—</b></span>)}
+      </div>
+    </>
+  );
+}
+function NeutralDonut() {
+  return (
+    <div className="v3-donut-wrap">
+      <div className="v3-donut neutral"><span>—<small>Unavailable</small></span></div>
+      <div className="v3-donut-legend">
+        {['Copilot', 'Claude', 'Codex', 'Cursor', 'Other'].map((tool, i) => (
+          <span key={tool}><i className={`mix-${i}`} />{tool}<b>—</b></span>
+        ))}
+      </div>
+    </div>
+  );
+}
+function WeekRail() {
+  return (
+    <>
+      <div className="v3-weekgrid" aria-label="Twelve-week activity unavailable">
+        {Array.from({ length: 12 }, (_, i) => <span key={i}><i /></span>)}
+        <b />
+      </div>
+      <div className="v3-weeklabels"><span>WK 1</span><em>HISTORY UNAVAILABLE</em><span>WK 12</span></div>
+    </>
+  );
 }
 function Scores({
   data,
@@ -281,10 +464,148 @@ function Scores({
     </>
   );
 }
+function DeveloperOverview({
+  session,
+  scores,
+  courses,
+  recognition,
+  subject,
+  hideBreadcrumbs = false,
+  onTeam,
+  onOrganization,
+  onLearning,
+}: {
+  session: Session;
+  scores: Scorecard;
+  courses: Course[];
+  recognition: Recognition | null;
+  subject?: Person;
+  hideBreadcrumbs?: boolean;
+  onTeam: () => void;
+  onOrganization: () => void;
+  onLearning: () => void;
+}) {
+  const team = session.scopes.find((s) => s.kind === 'team')?.name ?? 'Unavailable';
+  const [path, setPath] = useState<'ic' | 'lead' | 'elective'>('ic');
+  const profileName = subject?.display_name ?? session.user.display_name;
+  const profileRole = subject?.employment_type ?? session.user.job_role ?? session.user.employment_type;
+  const managerView = Boolean(subject);
+  // The approved M25 groups are independent; no blended coverage or finish is inferred.
+  const coverage = null;
+  const visibleCourses = managerView ? [] : courses;
+  const completed = visibleCourses.filter((c) => c.status === 'completed').length;
+  const earned = managerView ? 0 : Math.min(6, recognition?.badges.length ?? 0);
+  const pathCourses = path === 'elective'
+    ? visibleCourses.filter((c) => !c.required)
+    : path === 'lead'
+      ? []
+      : visibleCourses.filter((c) => c.required);
+  return (
+    <>
+      {!hideBreadcrumbs && <Breadcrumbs
+        level="me"
+        name={profileName}
+        team={team}
+        onMe={() => {}}
+        onTeam={onTeam}
+        onOrganization={onOrganization}
+      />}
+      {managerView && <p className="v3-manager-note">Manager view · Authorized scorecard for {profileName}. Learning and recognition are not exposed by this scope.</p>}
+      <div className="v3-developer-grid">
+        <div>
+          <section className="v3-procard">
+            <div className="v3-prohead">
+              <div className="v3-proleft">
+                <span className="v3-avatar-ring"><span className="v3-avatar">{initials(profileName)}</span></span>
+                <div>
+                  <h2>{profileName}</h2>
+                  <p>{profileRole} · {team}</p>
+                  <p className="v3-caslon">Gateway, Copilot &amp; the Skill Library — tools of the trade.</p>
+                </div>
+              </div>
+              <div className="v3-proright">
+                <div className="v3-rankplaque">
+                  <span className="v3-paint-chip" />
+                  <div><small>Current finish</small><strong>{coverage === null ? 'Unavailable' : coverage >= 80 ? 'High Gloss' : coverage >= 60 ? 'Semi-Gloss' : 'Satin'}</strong></div>
+                </div>
+                <PaintCan percent={coverage} />
+              </div>
+            </div>
+            <div className="v3-achievements">
+              <div><strong>{managerView ? '—' : earned} <small>{managerView ? '' : 'of 6'}</small></strong><span>Badges</span></div>
+              <div><strong>{managerView ? '—' : value(recognition?.points)}</strong><span>Points</span></div>
+              <div><strong>{managerView ? '—' : recognition?.certifications.length ?? 0}</strong><span>Certs</span></div>
+              <div><strong>Unavailable</strong><span>Weeks active</span></div>
+            </div>
+          </section>
+          <section className="v3-panel-block">
+            <span className="v3-panel-label">My badge wall</span>
+            <BadgeRack earned={managerView ? -1 : earned} />
+          </section>
+          <section className="v3-panel-block">
+            <div className="v3-panel-heading">
+              <span className="v3-panel-label">My learning · available paths</span>
+              {!managerView && <button onClick={onLearning}>Open all learning</button>}
+            </div>
+            <div className="v3-pathcards">
+              <button className={path === 'ic' ? 'on' : ''} onClick={() => setPath('ic')}><strong>Individual Contributor Path</strong><p>Assigned PostgreSQL catalogue · {visibleCourses.filter((c) => c.required).length} courses</p><progress max={visibleCourses.length || 1} value={completed} /><small>{managerView ? 'Unavailable' : `${completed} complete`}</small></button>
+              <button className={path === 'lead' ? 'on' : ''} onClick={() => setPath('lead')}><strong>Dev Lead Path</strong><p>Role-specific assignment status</p><span>Unavailable</span></button>
+              <button className={path === 'elective' ? 'on' : ''} onClick={() => setPath('elective')}><strong>Ad Hoc Electives</strong><p>Eligible optional catalogue</p><span>{managerView ? 'Unavailable' : `${visibleCourses.filter((c) => !c.required).length} available`}</span></button>
+            </div>
+            <div className="v3-stagehead"><i /><span>{path === 'elective' ? 'Electives' : path === 'lead' ? 'Dev Lead' : 'Assigned'} · Current catalogue</span><b /></div>
+            {pathCourses.slice(0, 6).map((c) => (
+              <div className="v3-learning-row" key={c.id}>
+                <span className={`v3-course-status ${c.status === 'completed' ? 'done' : ''}`}>{c.status === 'completed' ? 'Complete' : c.status ? status(c.status) : 'Not started'}</span>
+                <div><strong>{c.title}</strong><small>{c.provider} · version {c.version_number}</small></div>
+                <i style={{ background: badgePaint[Math.min(5, c.required ? 0 : 3)][4] }} />
+              </div>
+            ))}
+            {!pathCourses.length && <p className="v3-muted">Course records for this path are unavailable.</p>}
+          </section>
+          <section className="v3-panel-block">
+            <span className="v3-panel-label">My certifications</span>
+            {!managerView && recognition?.certifications.length ? recognition.certifications.map((c, i) => (
+              <div className="v3-cert-row" key={c.certification_name}>
+                <i style={{ background: badgePaint[(i + 3) % 6][4] }} />
+                <div><strong>{c.certification_name}</strong><small>{c.issuer}</small></div>
+                <span>{status(c.verification_status)}</span>
+              </div>
+            )) : <p className="v3-muted">No certification records are available.</p>}
+          </section>
+          <section className="v3-panel-block">
+            <span className="v3-panel-label">My 12-week activity</span>
+            <WeekRail />
+            <p className="v3-muted">Weekly activity is not present in the authorized API response.</p>
+          </section>
+        </div>
+        <aside>
+          <section className="v3-panel-block">
+            <span className="v3-panel-label">My skill mix · by tool</span>
+            <NeutralDonut />
+            <p className="v3-muted">No tool-mix value is inferred.</p>
+          </section>
+          <section className="v3-panel-block">
+            <span className="v3-panel-label">Me vs. {team}</span>
+            {['E', 'A', 'T', 'F', 'Q'].map((code) => {
+              const score = scores.groups.find((g) => g.group_code === code)?.score;
+              return <div className="v3-vsrow" key={code}><div><span>{groups[code]}</span><b>{score === null ? 'Unavailable' : `${value(score)} current`}</b></div><i><span style={{ width: `${score === null ? 0 : Number(score)}%` }} /></i><small>Team comparison unavailable</small></div>;
+            })}
+            <p className="v3-muted">Five independent M25 groups. No overall score.</p>
+          </section>
+          <section className="v3-panel-block">
+            <span className="v3-panel-label">Team trend · weekly active</span>
+            <TrendChart label="Team weekly active history unavailable" />
+          </section>
+        </aside>
+      </div>
+    </>
+  );
+}
 export default function Home() {
-  const [user, setUser] = useState(firstUser);
-  const [profiles, setProfiles] = useState<Profile[]>([]);
   const [session, setSession] = useState<Session | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [tab, setTab] = useState('scores');
   const [scores, setScores] = useState<Scorecard | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -297,7 +618,9 @@ export default function Home() {
   const [scope, setScope] = useState('');
   const [people, setPeople] = useState<Person[]>([]);
   const [scopeScores, setScopeScores] = useState<Scorecard | null>(null);
+  const [scopeCards, setScopeCards] = useState<Record<string, Scorecard>>({});
   const [subjectName, setSubjectName] = useState('');
+  const [subjectPerson, setSubjectPerson] = useState<Person | null>(null);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(true);
@@ -313,20 +636,23 @@ export default function Home() {
   const epoch = useRef(0);
   const commandRef = useRef<{ signature: string; id: string } | null>(null);
   useEffect(() => {
-    let live = true;
-    request<Profile[]>(firstUser, '/demo/profiles')
-      .then((p) => {
-        if (live) setProfiles(p);
-      })
-      .catch(() => {});
     const update = () => setOffline(!navigator.onLine);
+    const unauthorized = () => {
+      epoch.current += 1;
+      setSession(null);
+      setAuthChecked(true);
+      setLoading(false);
+      setBusy(false);
+      setError('');
+    };
     update();
     window.addEventListener('online', update);
     window.addEventListener('offline', update);
+    window.addEventListener('cover:unauthorized', unauthorized);
     return () => {
-      live = false;
       window.removeEventListener('online', update);
       window.removeEventListener('offline', update);
+      window.removeEventListener('cover:unauthorized', unauthorized);
     };
   }, []);
   useEffect(() => {
@@ -340,6 +666,7 @@ export default function Home() {
       setScores(null);
       setCourses([]);
       setScopeScores(null);
+      setScopeCards({});
       setPeople([]);
       setOps(null);
       setRecognition(null);
@@ -351,14 +678,14 @@ export default function Home() {
       setMetric(null);
       commandRef.current = null;
     });
-    request<Session>(user, '/session')
+    request<Session>('/session')
       .then(async (s) => {
         const [sc, co, ch, re, con] = await Promise.all([
-          request<Scorecard>(user, '/me/scorecard'),
-          request<Course[]>(user, '/me/courses'),
-          request<Assessment[]>(user, '/me/assessments'),
-          request<Recognition>(user, '/me/recognition'),
-          request<Consumption>(user, '/me/consumption?month=2026-09'),
+          request<Scorecard>('/me/scorecard'),
+          request<Course[]>('/me/courses'),
+          request<Assessment[]>('/me/assessments'),
+          request<Recognition>('/me/recognition'),
+          request<Consumption>('/me/consumption?month=2026-09'),
         ]);
         if (!live || current !== epoch.current) return;
         setSession(s);
@@ -370,20 +697,24 @@ export default function Home() {
         setScope(s.scopes[0]?.id ?? '');
       })
       .catch((e) => {
-        if (live) setError(e.message);
+        if (live && (e as Error & { status?: number }).status !== 401)
+          setError(e.message);
       })
       .finally(() => {
-        if (live) setLoading(false);
+        if (live) {
+          setLoading(false);
+          setAuthChecked(true);
+        }
       });
     return () => {
       live = false;
     };
-  }, [user, revision]); // month is refreshed independently below
+  }, [revision]); // month is refreshed independently below
   useEffect(() => {
     if (!session) return;
     let live = true;
     const timer = setTimeout(() => {
-      request<Course[]>(user, `/me/courses?q=${encodeURIComponent(search)}`)
+      request<Course[]>(`/me/courses?q=${encodeURIComponent(search)}`)
         .then((r) => {
           if (live) setCourses(r);
         })
@@ -395,14 +726,14 @@ export default function Home() {
       live = false;
       clearTimeout(timer);
     };
-  }, [search, session, user]);
+  }, [search, session]);
   useEffect(() => {
     if (!session) return;
     let live = true;
     queueMicrotask(() => {
       if (live) setConsumption(null);
     });
-    request<Consumption>(user, `/me/consumption?month=${month}`)
+    request<Consumption>(`/me/consumption?month=${month}`)
       .then((r) => {
         if (live) setConsumption(r);
       })
@@ -412,7 +743,7 @@ export default function Home() {
     return () => {
       live = false;
     };
-  }, [month, session, user]);
+  }, [month, session]);
   useEffect(() => {
     if (!session || !scope || tab !== 'scope') return;
     let live = true;
@@ -421,9 +752,10 @@ export default function Home() {
         setScopeScores(null);
         setPeople([]);
         setSubjectName('');
+        setSubjectPerson(null);
       }
     });
-    request<Scorecard>(user, `/scopes/${scope}/scorecard`)
+    request<Scorecard>(`/scopes/${scope}/scorecard`)
       .then((r) => {
         if (live) setScopeScores(r);
       })
@@ -433,22 +765,33 @@ export default function Home() {
     if (
       session.scopes.find((s) => s.id === scope)?.permissions.includes('people')
     )
-      request<{ rows: Person[] }>(user, `/scopes/${scope}/people`)
+      request<{ rows: Person[] }>(`/scopes/${scope}/people`)
         .then((r) => {
           if (live) setPeople(r.rows);
         })
         .catch((e) => {
           if (live) setError(e.message);
         });
+    void Promise.all(
+      session.scopes
+        .filter((s) => s.permissions.includes('aggregate'))
+        .map(async (s) => [s.id, await request<Scorecard>(`/scopes/${s.id}/scorecard`)] as const),
+    )
+      .then((rows) => {
+        if (live) setScopeCards(Object.fromEntries(rows));
+      })
+      .catch((e) => {
+        if (live) setError(e.message);
+      });
     return () => {
       live = false;
     };
-  }, [scope, tab, session, user]);
+  }, [scope, tab, session]);
   useEffect(() => {
     if (tab !== 'operations' || !session) return;
     let live = true;
     const load = () =>
-      request<Operations>(user, '/operations')
+      request<Operations>('/operations')
         .then((r) => {
           if (live) setOps(r);
         })
@@ -461,19 +804,18 @@ export default function Home() {
       live = false;
       clearInterval(timer);
     };
-  }, [tab, user, session]);
+  }, [tab, session]);
   const command = useCallback(
     async (action: string, body: Record<string, unknown>, version?: number) => {
       setBusy(true);
       setError('');
       setNotice('');
       const current = epoch.current;
-      const signature = JSON.stringify({ user, action, body, version });
+      const signature = JSON.stringify({ action, body, version });
       if (commandRef.current?.signature !== signature)
         commandRef.current = { signature, id: crypto.randomUUID() };
       try {
         const result = await request<Record<string, unknown>>(
-          user,
           `/commands/${action}`,
           {
             method: 'POST',
@@ -502,7 +844,7 @@ export default function Home() {
         if (current === epoch.current) setBusy(false);
       }
     },
-    [user],
+    [],
   );
   async function learningCommand(
     action: string,
@@ -524,10 +866,7 @@ export default function Home() {
   async function viewEvidence(c: Course) {
     try {
       setEvidence(
-        await request<Evidence[]>(
-          user,
-          `/enrollments/${c.enrollment_id}/evidence`,
-        ),
+        await request<Evidence[]>(`/enrollments/${c.enrollment_id}/evidence`),
       );
     } catch (e) {
       setError((e as Error).message);
@@ -546,7 +885,7 @@ export default function Home() {
           status: string;
           result: unknown;
           error: string;
-        }>(user, `/jobs/${String(r.jobId)}`);
+        }>(`/jobs/${String(r.jobId)}`);
         if (job.status === 'failed') throw new Error(job.error);
         if (job.status === 'succeeded') {
           const url = URL.createObjectURL(
@@ -572,6 +911,37 @@ export default function Home() {
       setBusy(false);
     }
   }
+  async function signIn(event: { preventDefault(): void }) {
+    event.preventDefault();
+    setBusy(true);
+    setError('');
+    try {
+      await request<{ authenticated: boolean }>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+      setPassword('');
+      setAuthChecked(false);
+      setRevision((n) => n + 1);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Unable to sign in.');
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function signOut() {
+    setBusy(true);
+    try {
+      await request<void>('/auth/logout', { method: 'POST' });
+    } finally {
+      epoch.current += 1;
+      setSession(null);
+      setAuthChecked(true);
+      setLoading(false);
+      setBusy(false);
+      setTab('scores');
+    }
+  }
   const tabs = [
     { id: 'scores', label: 'My scorecards', icon: BarChart3 },
     { id: 'learning', label: 'Learning', icon: BookOpen },
@@ -585,6 +955,53 @@ export default function Home() {
   const completedCourses = courses.filter(
     (c) => c.status === 'completed',
   ).length;
+  const scopeAdoption = scopeScores?.groups.find((g) => g.group_code === 'A')?.score;
+  if (authChecked && !session)
+    return (
+      <div className="v3-login">
+        <div className="v3-login-art" aria-hidden="true">
+          <span><Image src="/sw-logo.svg" alt="" width={450} height={224} priority /></span>
+        </div>
+        <main>
+          <span className="v3-kicker">Sherwin-Williams · Internal</span>
+          <h1>Cover the<br />Codebase</h1>
+          <span className="v3-brush" aria-hidden="true" />
+          <p className="v3-login-tag">Developer AI enablement, adoption and growth.</p>
+          <form onSubmit={signIn}>
+            <div>
+              <span className="v3-kicker">Secure workspace</span>
+              <h2>Sign in</h2>
+              <p>Use your authorized email and password.</p>
+            </div>
+            <label>
+              Email address
+              <input
+                type="email"
+                autoComplete="username"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </label>
+            <label>
+              Password
+              <input
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </label>
+            {error && <p className="v3-error" role="alert">{error}</p>}
+            <Button type="submit" disabled={busy}>
+              <LockKeyhole size={16} />
+              {busy ? 'Signing in…' : 'Sign in'}
+            </Button>
+          </form>
+        </main>
+      </div>
+    );
   return (
     <div className="v3-app">
       <a className="v3-skip" href="#main">
@@ -595,14 +1012,24 @@ export default function Home() {
         <span>Local demo · Synthetic data · Q3 2026</span>
       </div>
       <header className="v3-header">
+        <svg className="v3-splat" viewBox="0 0 380 260" aria-hidden="true">
+          <circle cx="270" cy="80" r="58" /><circle cx="200" cy="170" r="22" />
+          <circle cx="330" cy="180" r="34" /><circle cx="160" cy="60" r="9" />
+          <circle cx="345" cy="60" r="7" /><circle cx="240" cy="228" r="8" />
+          <path d="M270,138 q6,26 -4,44 q14,-8 12,-44 Z" />
+          <path d="M120,110 q30,-18 58,-4 q-24,-26 -58,4 Z" />
+        </svg>
         <div className="v3-brand">
+          <div className="v3-logo-chip" aria-label="Sherwin-Williams">
+            <Image src="/sw-logo.svg" alt="Sherwin-Williams" width={450} height={224} priority />
+          </div>
           <span className="v3-kicker">AI adoption scoreboard</span>
           <h1>
             Cover the
             <br />
             Codebase
           </h1>
-          <span className="v3-brush" aria-hidden="true" />
+          <svg className="v3-titlebrush" viewBox="0 0 230 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2,7 C28,2 55,11 85,6 C115,1 145,10 175,5 C198,2 218,9 228,5 L228,8 C205,12 180,7 155,10 C125,13 95,6 65,10 C42,13 18,10 2,10 Z" /></svg>
           <p>Your learning, activity and recognition—one standard of finish.</p>
         </div>
         <div className="v3-hero-stats" aria-label="Personal summary">
@@ -635,56 +1062,34 @@ export default function Home() {
             <span>Points</span>
           </div>
         </div>
-        <label className="v3-profile">
-          Test as
-          <select
-            value={user}
-            disabled={busy}
-            onChange={(e) => {
-              setSession(null);
-              setLoading(true);
-              setUser(e.target.value);
-              setNotice('');
-              setTab('scores');
-              setSearch('');
-            }}
-          >
-            {(profiles.length
-              ? profiles
-              : [{ id: firstUser, name: 'Priya Kowalski', role: 'Employee' }]
-            ).map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name} · {p.role}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="v3-header-actions">
+          <details className="v3-workspace-menu">
+            <summary>Workspace</summary>
+            <nav aria-label="Main navigation">
+              {tabs.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => {
+                    setTab(t.id);
+                    setError('');
+                  }}
+                  aria-current={tab === t.id ? 'page' : undefined}
+                >
+                  <t.icon size={15} />
+                  {t.label}
+                </button>
+              ))}
+            </nav>
+          </details>
+          <Button className="v3-logout" onClick={() => void signOut()} disabled={busy}>
+            <LogOut size={15} /> Logout
+          </Button>
+        </div>
       </header>
+      <svg className="v3-drip" viewBox="0 0 1200 26" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0,0 H1200 V7 C1150,7 1140,20 1110,20 C1080,20 1075,7 1030,7 C980,7 975,24 940,24 C905,24 900,7 850,7 C790,7 785,16 750,16 C715,16 710,7 660,7 C600,7 595,22 560,22 C525,22 520,7 470,7 C410,7 405,14 370,14 C335,14 330,7 280,7 C220,7 215,18 180,18 C145,18 140,7 90,7 C50,7 40,12 0,12 Z" />
+      </svg>
       <div className="v3-layout">
-        <nav aria-label="Main navigation">
-          {tabs.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => {
-                setTab(t.id);
-                setError('');
-              }}
-              aria-current={tab === t.id ? 'page' : undefined}
-            >
-              <t.icon size={18} />
-              {t.label}
-            </button>
-          ))}
-          <div className="v3-nav-note">
-            <ShieldCheck size={20} />
-            <p>
-              Five group scores.
-              <br />
-              No overall ranking.
-            </p>
-            <small>Sample weights and references are for testing only.</small>
-          </div>
-        </nav>
         <main id="main">
           <div className="v3-toolbar">
             <div className="v3-person">
@@ -752,6 +1157,29 @@ export default function Home() {
             <>
               {tab === 'scores' && scores && (
                 <>
+                  <DeveloperOverview
+                    session={session}
+                    scores={scores}
+                    courses={courses}
+                    recognition={recognition}
+                    onLearning={() => setTab('learning')}
+                    onTeam={() => {
+                      const teamScope = session.scopes.find((s) => s.kind === 'team');
+                      if (teamScope) setScope(teamScope.id);
+                      setTab('scope');
+                    }}
+                    onOrganization={() => {
+                      const orgScope = session.scopes.find((s) => s.kind === 'organization');
+                      if (orgScope) setScope(orgScope.id);
+                      setTab('scope');
+                    }}
+                  />
+                  <div className="v3-section-title">
+                    <div>
+                      <h2>M25 scorecard detail</h2>
+                      <p>Evidence, definitions and independent group calculations.</p>
+                    </div>
+                  </div>
                   <Scores data={scores} onDetail={setMetric} />
                   <Button
                     variant="outline"
@@ -964,7 +1392,46 @@ export default function Home() {
                 <>
                   {session.scopes.length ? (
                     <>
-                      <label className="v3-search">
+                      <Breadcrumbs
+                        level={session.scopes.find((s) => s.id === scope)?.kind === 'team' ? 'team' : 'organization'}
+                        name={session.user.display_name}
+                        team={session.scopes.find((s) => s.kind === 'team')?.name ?? 'Unavailable'}
+                        onMe={() => setTab('scores')}
+                        onTeam={() => {
+                          const s = session.scopes.find((item) => item.kind === 'team');
+                          if (s) setScope(s.id);
+                        }}
+                        onOrganization={() => {
+                          const s = session.scopes.find((item) => item.kind === 'organization');
+                          if (s) setScope(s.id);
+                        }}
+                      />
+                      {!subjectName && <div className="v3-axes">
+                        <article><h3>1. Enablement</h3><p>Required learning and assessment evidence from PostgreSQL.</p></article>
+                        <article><h3>2. Adoption</h3><p>Authorized adoption projections in the current publication.</p></article>
+                        <article><h3>3. Effective</h3><p>Jira baseline summary: <b>Unavailable</b>. No value is inferred.</p></article>
+                      </div>}
+                      {!subjectName && <div className="v3-coty-banner"><i /><div><strong>2026 Color of the Year · Unavailable</strong><b>Award data unavailable</b><p>No quarterly blended award is inferred from independent score groups.</p></div></div>}
+                      {!subjectName && <div className="v3-section-title"><h2>Organization scoreboard</h2></div>}
+                      {!subjectName && <div className="v3-org-board">
+                        <div className="head"><span>Team</span><span>Enablement</span><span>Adoption</span><span>Effective (vs. baseline)</span><span>Finish</span><span /></div>
+                        {session.scopes.filter((s) => s.permissions.includes('aggregate')).map((s) => {
+                          const card = scopeCards[s.id];
+                          const e = card?.groups.find((g) => g.group_code === 'E')?.score ?? null;
+                          const a = card?.groups.find((g) => g.group_code === 'A')?.score ?? null;
+                          return (
+                            <button key={s.id} onClick={() => setScope(s.id)}>
+                              <span><strong>{s.name}</strong><small>{s.kind}</small></span>
+                              <span><b className="v3-pct blue">{e === null ? 'Unavailable' : value(e)}</b><i className="v3-track"><em style={{ width: `${e ?? 0}%` }} /></i></span>
+                              <span><b className="v3-pct navy">{a === null ? 'Unavailable' : value(a)}</b><i className="v3-track"><em style={{ width: `${a ?? 0}%` }} /></i></span>
+                              <span className="v3-muted">Unavailable</span>
+                              <span className="v3-sheen">Unavailable</span>
+                              <span className="v3-chev">›</span>
+                            </button>
+                          );
+                        })}
+                      </div>}
+                      {!subjectName && <label className="v3-search">
                         Authorized scope
                         <select
                           value={scope}
@@ -976,15 +1443,15 @@ export default function Home() {
                             </option>
                           ))}
                         </select>
-                      </label>
+                      </label>}
                       {subjectName && (
                         <p className="v3-notice">
                           Authorized individual view: {subjectName}.{' '}
                           <button
                             onClick={() => {
                               setSubjectName('');
+                              setSubjectPerson(null);
                               void request<Scorecard>(
-                                user,
                                 `/scopes/${scope}/scorecard`,
                               )
                                 .then(setScopeScores)
@@ -995,33 +1462,76 @@ export default function Home() {
                           </button>
                         </p>
                       )}
-                      {scopeScores ? (
-                        <Scores data={scopeScores} onDetail={setMetric} />
-                      ) : (
-                        <p>Loading scope…</p>
+                      {subjectPerson && scopeScores && (
+                        <DeveloperOverview
+                          session={session}
+                          scores={scopeScores}
+                          courses={[]}
+                          recognition={null}
+                          subject={subjectPerson}
+                          hideBreadcrumbs
+                          onLearning={() => {}}
+                          onTeam={() => {
+                            setSubjectName('');
+                            setSubjectPerson(null);
+                          }}
+                          onOrganization={() => {
+                            setSubjectName('');
+                            setSubjectPerson(null);
+                            const organization = session.scopes.find((s) => s.kind === 'organization');
+                            if (organization) setScope(organization.id);
+                          }}
+                        />
                       )}
-                      {people.length > 0 && (
+                      {!subjectName && session.scopes.find((s) => s.id === scope)?.kind === 'team' && (
                         <>
-                          <h3>Authorized people</h3>
-                          <div className="v3-people">
+                          <div className="v3-dethead">
+                            <div>
+                              <h2>{session.scopes.find((s) => s.id === scope)?.name}</h2>
+                              <p>Authorized PostgreSQL roster and aggregate analytics.</p>
+                            </div>
+                            <div className="v3-detstats">
+                              <div><strong>{value(scopeScores?.groups.find((g) => g.group_code === 'E')?.score)}</strong><span>Enablement</span></div>
+                              <div><strong>{value(scopeScores?.groups.find((g) => g.group_code === 'A')?.score)}</strong><span>Adoption</span></div>
+                              <div><strong>Unavailable</strong><span>Finish</span></div>
+                            </div>
+                          </div>
+                          <div className="v3-team-panels">
+                            <article><span>Weekly active adoption · 12 weeks</span><TrendChart current={scopeAdoption === null || scopeAdoption === undefined ? null : Number(scopeAdoption)} label="Weekly history unavailable; current adoption snapshot shown" /></article>
+                            <article><span>Badge coverage · team</span><RailRows labels={badgePaint.map((b) => b[0])} /></article>
+                            <article><span>Sheen mix · roster</span><NeutralMixBar labels={['Flat', 'Eggshell', 'Satin', 'Semi-Gloss', 'High Gloss']} /></article>
+                            <article><span>Certifications · roster</span><RailRows labels={['GH-300', 'AI-102', 'GenAI', 'AIF-C01']} /></article>
+                          </div>
+                        </>
+                      )}
+                      {!subjectName && scopeScores ? (
+                        <Scores data={scopeScores} onDetail={setMetric} />
+                      ) : !subjectName ? (
+                        <p>Loading scope…</p>
+                      ) : null}
+                      {!subjectName && people.length > 0 && (
+                        <>
+                          <div className="v3-section-title"><h2>The roster</h2></div>
+                          <div className="v3-roster">
+                            <div className="head"><span>Developer</span><span>Badges</span><span>12-wk activity</span><span>Weekly active</span><span>Finish</span></div>
                             {people.map((p) => (
-                              <Button
+                              <button
                                 key={p.id}
-                                variant="outline"
                                 onClick={() => {
                                   void request<Scorecard>(
-                                    user,
                                     `/people/${p.id}/scorecard`,
                                   )
                                     .then((r) => {
                                       setScopeScores(r);
                                       setSubjectName(p.display_name);
+                                      setSubjectPerson(p);
                                     })
                                     .catch((e) => setError(e.message));
                                 }}
                               >
-                                {p.display_name} · {p.employment_type}
-                              </Button>
+                                <span><strong>{p.display_name}</strong><small>{p.employment_type}</small></span>
+                                <span><span className="v3-mini-chips">{badgePaint.map((b) => <i key={b[0]} />)}</span><small>Unavailable</small></span><span><Sparkline /></span><span className="v3-muted">Unavailable</span><span>Unavailable ›</span>
+                              </button>
                             ))}
                           </div>
                         </>

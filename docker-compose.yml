@@ -1,12 +1,15 @@
 services:
   web:
     image: cover-codebase-v3-local
-    command: npm run dev -- --host 0.0.0.0
+    command: sh -c "rm -f .vinext/dev/lock.json && npm run dev -- --hostname 0.0.0.0"
     ports: ["127.0.0.1:3000:3000"]
     environment:
       NODE_ENV: development
       DEMO_MODE: "true"
-      BACKEND_API_URL: http://api:4000
+      BACKEND_API_URL: http://host.docker.internal:4000
+      NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes: [".:/app", "/app/node_modules"]
     depends_on:
       api:
@@ -16,7 +19,7 @@ services:
     build:
       context: .
       target: development
-    command: sh -c "npm run db:migrate && npm run db:seed && npm run db:seed:v3 && npm run api:dev"
+    command: sh -c "npm run db:migrate && npm run db:seed && npm run db:seed:v3 && npm run db:seed:auth && npm run api:dev"
     ports: ["127.0.0.1:4000:4000"]
     environment:
       NODE_ENV: development
@@ -25,7 +28,8 @@ services:
       API_PORT: "4000"
       API_HOST: "0.0.0.0"
       API_ALLOWED_ORIGIN: http://localhost:3000
-      DEFAULT_USER_ID: 7c986e20-43a2-4a86-817d-6effc840ca91
+      # Local demo convenience only. Override this in your shell or .env.
+      LOCAL_AUTH_PASSWORD: "${LOCAL_AUTH_PASSWORD:-cover-local-demo}"
       DATABASE_URL: postgresql://cover_app:cover_dev@postgres:5432/cover_codebase
       DATABASE_POOL_SIZE: "10"
     volumes: [".:/app", "/app/node_modules"]

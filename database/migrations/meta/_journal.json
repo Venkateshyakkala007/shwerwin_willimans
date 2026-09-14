@@ -15,6 +15,13 @@
       "when": 1788933600000,
       "tag": "0001_v3",
       "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789400400000,
+      "tag": "0002_local_auth",
+      "breakpoints": false
     }
   ]
 }

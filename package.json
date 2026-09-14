@@ -24,7 +24,8 @@
     "verify": "npm run typecheck && npm run lint && npm test && node scripts/verify.mjs",
     "docker:up": "docker compose up --build",
     "docker:down": "docker compose down",
-    "db:seed:v3": "node scripts/run-sql.mjs database/v3-seed.sql"
+    "db:seed:v3": "node scripts/run-sql.mjs database/v3-seed.sql",
+    "db:seed:auth": "node scripts/seed-auth.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",

@@ -10,7 +10,7 @@ const fail=(status:number,code:string,message:string):never=>{throw new ApiProbl
 export const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function id(value:unknown):string { if(typeof value!=='string'||!UUID.test(value)) return fail(400,'INVALID_ID','A UUID identifier is required.'); return value; }
 export async function authorize(db:DB,userId:string) {
- const r=await db.query('SELECT id,display_name,employment_type,active,entitled,profile_status FROM users WHERE id=$1',[id(userId)]);
+ const r=await db.query('SELECT id,display_name,employment_type,job_role,active,entitled,profile_status FROM users WHERE id=$1',[id(userId)]);
  const u=r.rows[0]; if(!u||!u.active||!u.entitled||u.profile_status!=='active'||!['employee','contractor'].includes(u.employment_type)) fail(403,'ACCESS_DENIED','This account does not currently have application access.'); return u;
 }
 const eligible=`cv.active AND c.active AND ((cv.access_tier='public' AND cv.public_access_verified AND cv.public_review_until>now()) OR (u.employment_type='employee' AND EXISTS(SELECT 1 FROM v3.content_entitlement ce WHERE ce.user_id=u.id AND ce.course_version_id=cv.id)))`;
